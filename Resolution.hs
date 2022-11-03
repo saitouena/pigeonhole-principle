@@ -47,11 +47,14 @@ resolveClauses cs1 cs2 = nub $ do
   c2 <- cs2
   resolve c1 c2
 
-php2 :: CNF
-php2 = [[Pos "a1"], [Pos "b1"], [Neg "a1", Neg "b1"]] 
+php1 :: CNF
+php1 = [[Pos "a1"], [Pos "b1"], [Neg "a1", Neg "b1"]] 
 
-php3 :: CNF
-php3 = [[a1, a2], [b1, b2], [c1, c2], [a1', b1'], [b1', c1'], [c1', a1'],  [a2', b2'], [b2', c2'], [c2', a2']]
+-- >>> resolveClauses php1 php1
+-- [[Neg "b1"],[Neg "a1"]] 
+
+php2 :: CNF
+php2 = [[a1, a2], [b1, b2], [c1, c2], [a1', b1'], [b1', c1'], [c1', a1'],  [a2', b2'], [b2', c2'], [c2', a2']]
   where
     a1 = Pos "a1"
     a2 = Pos "a2"
@@ -66,8 +69,21 @@ php3 = [[a1, a2], [b1, b2], [c1, c2], [a1', b1'], [b1', c1'], [c1', a1'],  [a2',
     c1' = complement c1
     c2' = complement c2
 
--- >>> resolveClauses php2 php2
--- [[Neg "b1"],[Neg "a1"]] 
+-- n+1 pigeons in n holes
+-- i, i' : index of pigeon
+-- j     : index of hole
+php :: Int -> CNF
+php n = [[ Pos (p i j)  | j <- [1..n] ] | i <- [1..(n+1)] ]
+  ++ [ [Neg (p i j), Neg (p i' j)] | j <- [1..n], i <- [1..(n+1)], i' <- [1..(n+1)], i < i' ]
+  where p i j = "p" ++ show i ++ show j
+
+-- >>> php 2
+-- [[Pos "p11",Pos "p12"],[Pos "p21",Pos "p22"],[Pos "p31",Pos "p32"],[Neg "p11",Neg "p21"],[Neg "p11",Neg "p31"],[Neg "p21",Neg "p31"],[Neg "p12",Neg "p22"],[Neg "p12",Neg "p32"],[Neg "p22",Neg "p32"]]
+-- >>> php 1
+-- [[Pos "p11"],[Pos "p21"],[Neg "p11",Neg "p21"]]
+--
+
+
 
 refute' :: [Clause] -> [Clause] -> Result
 refute' old new
@@ -81,12 +97,13 @@ refute cnf
   | elem emptyClause cnf = Refuted cnf
   | otherwise = refute' [] cnf
 
--- >>> refute php2
+-- >>> refute php1
 -- Refuted [[Pos "a1"],[Pos "b1"],[Neg "a1",Neg "b1"],[Neg "b1"],[Neg "a1"],[]]
 --
--- >>> refute php3
+-- >>> refute php2
 -- Refuted [[Pos "a1",Pos "a2"],[Pos "b1",Pos "b2"],[Pos "c1",Pos "c2"],[Neg "a1",Neg "b1"],[Neg "b1",Neg "c1"],[Neg "c1",Neg "a1"],[Neg "a2",Neg "b2"],[Neg "b2",Neg "c2"],[Neg "c2",Neg "a2"],[Pos "a2",Neg "b1"],[Pos "a2",Neg "c1"],[Pos "a1",Neg "b2"],[Pos "a1",Neg "c2"],[Pos "b2",Neg "a1"],[Pos "b2",Neg "c1"],[Pos "b1",Neg "a2"],[Pos "b1",Neg "c2"],[Pos "c2",Neg "b1"],[Pos "c2",Neg "a1"],[Pos "c1",Neg "b2"],[Pos "c1",Neg "a2"],[Pos "a2",Pos "b2"],[Neg "b1",Neg "b2"],[Neg "b1",Neg "c2"],[Pos "a2",Pos "c2"],[Neg "c1",Neg "b2"],[Neg "c1",Neg "c2"],[Pos "a1",Pos "b1"],[Pos "a1",Pos "c1"],[Neg "a1",Neg "a2"],[Neg "a1",Neg "c2"],[Pos "b2",Pos "c2"],[Neg "c1",Neg "a2"],[Pos "b1",Pos "c1"],[Neg "b1",Neg "a2"],[Neg "a1",Neg "b2"],[Neg "b1",Pos "b1"],[Pos "a2",Neg "a2"],[Pos "a2",Neg "c2"],[Neg "b1",Pos "c1"],[Neg "c1",Pos "b1"],[Pos "a2",Neg "b2"],[Neg "c1",Pos "c1"],[Neg "b2",Pos "b2"],[Pos "a1",Neg "a1"],[Pos "a1",Neg "c1"],[Neg "b2",Pos "c2"],[Neg "c2",Pos "b2"],[Pos "a1",Neg "b1"],[Neg "c2",Pos "c2"],[Neg "a1",Pos "c1"],[Pos "b2",Neg "a2"],[Neg "a2",Pos "c2"],[Pos "b1",Neg "a1"],[Pos "b2",Neg "b2"],[Pos "b2",Neg "c2"],[Pos "a2",Pos "a1"],[Pos "b2",Pos "b1"],[Pos "a2",Pos "c1"],[Pos "b2",Pos "c1"],[Neg "b1",Neg "a1"],[Neg "b2",Neg "a2"],[Neg "c2"],[Neg "b1"],[Pos "c2",Neg "b2"],[Pos "c2",Neg "c2"],[Pos "c2",Pos "b1"],[Pos "a2",Pos "b1"],[Pos "c2",Pos "c1"],[Neg "c1"],[Neg "b2"],[Neg "c1",Neg "b1"],[Neg "c2",Neg "b2"],[Pos "b1",Neg "b1"],[Pos "b1",Neg "c1"],[Pos "a1",Pos "c2"],[Pos "c1",Neg "b1"],[Pos "c1",Neg "c1"],[Pos "a1",Pos "b2"],[Neg "a2",Pos "a2"],[Neg "a1",Pos "a1"],[Neg "a1",Neg "c1"],[Neg "a2",Neg "c2"],[Neg "c2",Pos "a2"],[Neg "a1"],[Pos "c2",Neg "a2"],[Neg "c1",Pos "a1"],[Neg "a2"],[Pos "c1",Neg "a1"],[Neg "b1",Pos "a1"],[Neg "a2",Pos "b2"],[Neg "b2",Pos "a2"],[Neg "a1",Pos "b1"],[Neg "b1",Pos "a2"],[Neg "b1",Pos "c2"],[Neg "a2",Pos "b1"],[Neg "a2",Pos "c1"],[Neg "c2",Pos "b1"],[Pos "a2",Neg "a1"],[Neg "c2",Pos "c1"],[Neg "b1",Pos "b2"],[Neg "c1",Pos "a2"],[Neg "c1",Pos "c2"],[Pos "b1",Neg "b2"],[Neg "b2",Pos "c1"],[Neg "c1",Pos "b2"],[Neg "b2",Pos "a1"],[Neg "a1",Pos "b2"],[Neg "a1",Pos "c2"],[Pos "a1",Neg "a2"],[Neg "c2",Pos "a1"],[Pos "b2",Pos "a2"],[Pos "a2"],[Pos "b2"],[Neg "b2",Neg "b1"],[Neg "b2",Neg "c1"],[Neg "b2",Neg "a1"],[Neg "c2",Neg "b1"],[Neg "c2",Neg "c1"],[Neg "c2",Neg "a1"],[Pos "c2",Pos "a2"],[Pos "c2",Pos "b2"],[Pos "c2"],[Pos "b1",Pos "a1"],[Pos "a1"],[Pos "b1"],[Pos "c1",Pos "a1"],[Pos "c1"],[Pos "c1",Pos "b1"],[Neg "a2",Neg "a1"],[Neg "a2",Neg "c1"],[Neg "a2",Neg "b1"],[Pos "b2",Neg "b1"],[Pos "b1",Pos "a2"],[Pos "b1",Pos "c2"],[Pos "b2",Pos "a1"],[Pos "c1",Neg "c2"],[Pos "c1",Pos "a2"],[Pos "c1",Pos "b2"],[Pos "c2",Neg "c1"],[Neg "b2",Pos "b1"],[Pos "c2",Pos "a1"],[Neg "a2",Pos "a1"],[Neg "a1",Pos "a2"],[Neg "b2",Pos "b2"],[Pos "b2",Neg "c2"],[Pos "b2",Pos "b1"],[Neg "b2",Neg "a2"],[Neg "b2",Pos "c2"],[Neg "b2"],[Neg "b2",Neg "c2"],[Pos "b2",Neg "a2"],[Neg "b2",Pos "a2"],[Neg "b2",Pos "c1"],[Pos "b2",Neg "c1"],[Neg "b2",Pos "a1"],[Pos "b2",Neg "a1"],[Pos "b2",Pos "a2"],[Pos "b2"],[Neg "b2",Neg "b1"],[Neg "b2",Neg "c1"],[Neg "b2",Neg "a1"],[Pos "b2",Pos "c2"],[Neg "c2",Neg "a2"],[Neg "c2",Pos "c2"],[Neg "c2"],[Neg "c2",Pos "a2"],[Neg "c2",Pos "b1"],[Neg "c2",Pos "a1"],[Neg "c2",Neg "b1"],[Neg "c2",Neg "c1"],[Neg "c2",Neg "a1"],[Pos "a2",Neg "b1"],[Pos "a1",Pos "a2"],[Pos "a2",Neg "c1"],[Pos "a2"],[Pos "a1"],[Pos "a1",Pos "b1"],[Pos "a1",Pos "c1"],[Pos "a2",Pos "c2"],[Pos "a1",Neg "a1"],[Pos "a2",Neg "a2"],[Pos "a1",Neg "c1"],[Pos "a1",Neg "b1"],[Pos "b1",Neg "a2"],[Pos "b1"],[Pos "b1",Pos "c1"],[Pos "b1",Neg "b1"],[Pos "b1",Neg "c1"],[Pos "b1",Neg "a1"],[Pos "c1",Pos "c2"],[Pos "c1"],[Pos "c1",Neg "a1"],[Pos "c1",Neg "c1"],[Pos "c1",Neg "b1"],[Pos "c1",Neg "a2"],[Neg "a1",Pos "c2"],[Neg "a1",Neg "b1"],[Neg "a1",Neg "c1"],[Neg "b1",Pos "c2"],[Neg "b1",Neg "c1"],[Neg "b1"],[Neg "a1"],[Neg "a1",Neg "a2"],[Neg "b1",Neg "a2"],[Neg "a2"],[Neg "a2",Neg "c1"],[Neg "a2",Pos "c2"],[Neg "c1"],[],[Pos "c2"]]
 --
 -- >>> refute [[Pos "a"], [Pos "b"]]
 -- Exhausted [[Pos "a"],[Pos "b"]]
---
+-- >>> refute (php 3)
+
