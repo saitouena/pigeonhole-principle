@@ -84,7 +84,6 @@ php n = [[ Pos (p i j)  | j <- [1..n] ] | i <- [1..(n+1)] ]
 --
 
 
-
 refute' :: [Clause] -> [Clause] -> Result
 refute' old new
   | null next_new = Exhausted (old ++ new)
@@ -97,6 +96,10 @@ refute cnf
   | elem emptyClause cnf = Refuted cnf
   | otherwise = refute' [] cnf
 
+refutationLength :: Result -> Int
+refutationLength (Refuted cs) = length cs
+refutationLength (Exhausted cs) = length cs
+
 -- >>> refute php1
 -- Refuted [[Pos "a1"],[Pos "b1"],[Neg "a1",Neg "b1"],[Neg "b1"],[Neg "a1"],[]]
 --
@@ -105,5 +108,9 @@ refute cnf
 --
 -- >>> refute [[Pos "a"], [Pos "b"]]
 -- Exhausted [[Pos "a"],[Pos "b"]]
--- >>> refute (php 3)
+-- >>> refute (php 2)
+-- Refuted [[Pos "p11",Pos "p12"],[Pos "p21",Pos "p22"],[Pos "p31",Pos "p32"],[Neg "p11",Neg "p21"],[Neg "p11",Neg "p31"],[Neg "p21",Neg "p31"],[Neg "p12",Neg "p22"],[Neg "p12",Neg "p32"],[Neg "p22",Neg "p32"],[Pos "p12",Neg "p21"],[Pos "p12",Neg "p31"],[Pos "p11",Neg "p22"],[Pos "p11",Neg "p32"],[Pos "p22",Neg "p11"],[Pos "p22",Neg "p31"],[Pos "p21",Neg "p12"],[Pos "p21",Neg "p32"],[Pos "p32",Neg "p11"],[Pos "p32",Neg "p21"],[Pos "p31",Neg "p12"],[Pos "p31",Neg "p22"],[Pos "p12",Pos "p22"],[Neg "p21",Neg "p22"],[Neg "p21",Neg "p32"],[Pos "p12",Pos "p32"],[Neg "p31",Neg "p22"],[Neg "p31",Neg "p32"],[Pos "p11",Pos "p21"],[Pos "p11",Pos "p31"],[Neg "p11",Neg "p12"],[Neg "p11",Neg "p32"],[Pos "p22",Pos "p32"],[Neg "p31",Neg "p12"],[Pos "p21",Pos "p31"],[Neg "p11",Neg "p22"],[Neg "p21",Neg "p12"],[Neg "p21",Pos "p21"],[Pos "p12",Neg "p12"],[Pos "p12",Neg "p32"],[Neg "p21",Pos "p31"],[Neg "p31",Pos "p21"],[Neg "p31",Pos "p31"],[Pos "p12",Neg "p22"],[Neg "p22",Pos "p22"],[Pos "p11",Neg "p11"],[Pos "p11",Neg "p31"],[Neg "p22",Pos "p32"],[Neg "p32",Pos "p22"],[Neg "p32",Pos "p32"],[Pos "p11",Neg "p21"],[Neg "p11",Pos "p31"],[Pos "p22",Neg "p12"],[Neg "p12",Pos "p32"],[Pos "p21",Neg "p11"],[Pos "p22",Neg "p22"],[Pos "p22",Neg "p32"],[Pos "p12",Pos "p11"],[Pos "p22",Pos "p21"],[Pos "p22",Pos "p31"],[Pos "p12",Pos "p31"],[Neg "p21",Neg "p11"],[Neg "p22",Neg "p12"],[Neg "p32",Neg "p12"],[Neg "p32"],[Neg "p21"],[Pos "p32",Neg "p22"],[Pos "p32",Neg "p32"],[Pos "p32",Pos "p21"],[Pos "p12",Pos "p21"],[Pos "p32",Pos "p31"],[Neg "p31",Neg "p11"],[Neg "p31"],[Neg "p22"],[Neg "p31",Neg "p21"],[Neg "p32",Neg "p22"],[Pos "p21",Neg "p21"],[Pos "p21",Neg "p31"],[Pos "p11",Pos "p32"],[Pos "p31",Neg "p21"],[Pos "p31",Neg "p31"],[Pos "p11",Pos "p22"],[Neg "p12",Pos "p12"],[Neg "p11",Pos "p11"],[Neg "p32",Pos "p12"],[Neg "p11"],[Pos "p32",Neg "p12"],[Neg "p31",Pos "p11"],[Neg "p12"],[Pos "p31",Neg "p11"],[Neg "p22",Pos "p12"],[Neg "p11",Pos "p21"],[Neg "p21",Pos "p11"],[Neg "p12",Pos "p22"],[Neg "p21",Pos "p12"],[Neg "p21",Pos "p32"],[Neg "p12",Pos "p21"],[Neg "p12",Pos "p31"],[Neg "p32",Pos "p21"],[Pos "p12",Neg "p11"],[Neg "p32",Pos "p31"],[Neg "p21",Pos "p22"],[Neg "p31",Pos "p12"],[Neg "p31",Pos "p32"],[Pos "p21",Neg "p22"],[Neg "p31",Pos "p22"],[Neg "p22",Pos "p31"],[Neg "p22",Pos "p11"],[Neg "p11",Pos "p22"],[Neg "p11",Pos "p32"],[Pos "p11",Neg "p12"],[Neg "p32",Pos "p11"],[Pos "p22",Pos "p12"],[Pos "p12"],[Pos "p22"],[Neg "p22",Neg "p21"],[Neg "p22",Neg "p31"],[Neg "p22",Neg "p11"],[Neg "p32",Neg "p21"],[Neg "p32",Neg "p31"],[Neg "p32",Neg "p11"],[Pos "p32",Pos "p12"],[Pos "p32",Pos "p22"],[Pos "p32"],[Pos "p21",Pos "p11"],[Pos "p11"],[Pos "p21"],[Pos "p31",Pos "p11"],[Pos "p31"],[Pos "p31",Pos "p21"],[Neg "p12",Neg "p11"],[Neg "p12",Neg "p31"],[Neg "p12",Neg "p21"],[Pos "p22",Neg "p21"],[Pos "p21",Pos "p12"],[Pos "p21",Pos "p32"],[Pos "p22",Pos "p11"],[Pos "p31",Neg "p32"],[Pos "p31",Pos "p12"],[Pos "p31",Pos "p22"],[Pos "p32",Neg "p31"],[Neg "p22",Pos "p21"],[Pos "p32",Pos "p11"],[Neg "p12",Pos "p11"],[Neg "p11",Pos "p12"],[Neg "p22",Pos "p22"],[Pos "p22",Neg "p32"],[Pos "p22",Pos "p21"],[Neg "p22",Neg "p12"],[Neg "p22",Pos "p32"],[Neg "p22"],[Neg "p22",Neg "p32"],[Neg "p22",Pos "p12"],[Pos "p22",Neg "p12"],[Pos "p22",Neg "p31"],[Neg "p22",Pos "p31"],[Neg "p22",Pos "p11"],[Pos "p22",Neg "p11"],[Pos "p22",Pos "p12"],[Pos "p22"],[Neg "p22",Neg "p21"],[Neg "p22",Neg "p31"],[Neg "p22",Neg "p11"],[Pos "p22",Pos "p32"],[Neg "p32",Neg "p12"],[Neg "p32",Pos "p32"],[Neg "p32"],[Neg "p32",Pos "p12"],[Neg "p32",Pos "p21"],[Neg "p32",Pos "p11"],[Neg "p32",Neg "p21"],[Neg "p32",Neg "p31"],[Neg "p32",Neg "p11"],[Pos "p12",Neg "p21"],[Pos "p12",Neg "p31"],[Pos "p11",Pos "p12"],[Pos "p12"],[Pos "p11"],[Pos "p11",Pos "p21"],[Pos "p11",Pos "p31"],[Pos "p12",Pos "p32"],[Pos "p11",Neg "p11"],[Pos "p12",Neg "p12"],[Pos "p11",Neg "p31"],[Pos "p11",Neg "p21"],[Pos "p21",Neg "p12"],[Pos "p21"],[Pos "p21",Pos "p31"],[Pos "p21",Neg "p21"],[Pos "p21",Neg "p31"],[Pos "p21",Neg "p11"],[Pos "p31",Neg "p12"],[Pos "p31",Pos "p32"],[Pos "p31"],[Pos "p31",Neg "p21"],[Pos "p31",Neg "p31"],[Pos "p31",Neg "p11"],[Neg "p11",Pos "p32"],[Neg "p11",Neg "p21"],[Neg "p11",Neg "p31"],[Neg "p21",Pos "p32"],[Neg "p21",Neg "p31"],[Neg "p11"],[Neg "p21"],[Neg "p11",Neg "p12"],[Neg "p21",Neg "p12"],[Neg "p12"],[Neg "p12",Neg "p31"],[Neg "p12",Pos "p32"],[Neg "p31"],[],[Pos "p32"]]
+-- >>> refutationLength (refute (php 2))
+-- 211
+-- >>> refutationLength (refute (php 3))
 
